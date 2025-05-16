@@ -55,16 +55,6 @@ local Window = WindUI:CreateWindow({
     SideBarWidth = 200,
     --Background = "rbxassetid://13511292247", -- rbxassetid only
     HasOutline = false,
-    -- remove it below if you don't want to use the key system in your script.
-    KeySystem = { 
-        Key = { "K3Y-94TQ-7XZP-W1LU", "ilovekira", "Javier Asrahan", "w", "PermKey_0000", "Nobi1705", "EliasGG" },
-        Note = "Press Get Key Pls!, I Need Money T_T!",
-         Thumbnail = {
-          Image = "rbxassetid://70911980001075", -- rbxassetid only
-         },
-        URL = "https://lootdest.org/s?565SNUR1&data=0jtpGgMIjVpRo/RXH4LKUC57WVbmCb621hJ2gzfmcJc%3D", -- remove this if the key is not obtained from the link.
-        SaveKey = false, -- optional
-    },
 })
 
 
