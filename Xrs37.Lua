@@ -79,6 +79,7 @@ local Tabs = {
     BallTab = Window:Tab({ Title = "Ball hack", Icon = "circle-play", Desc = "Hack ball content." }),
     MiscTab = Window:Tab({ Title = "Misc", Icon = "align-justify", Desc = "Subscribe to XZuyaX! " }),
     EventTab = Window:Tab({ Title = "Event", Icon = "gift", Desc = "this is just a trigger to open the event menu." }),
+    VisualTab = Window:Tab({ Title = "Visual", Icon = "scan-eye", Desc = "not too important." }),
     b = Window:Divider(),
     ServerTab = Window:Tab({ Title = "Server", Icon = "server", Desc = "Subscribe to XZuyaX! " }),
     WindowTab = Window:Tab({ Title = "Window and File Configuration", Icon = "settings", Desc = "Manage window settings and file configurations." }),
@@ -1050,6 +1051,29 @@ Tabs.EventTab:Button({
     end
 })
  
+Tabs.VisualTab:Toggle({
+    Title = "Visual Ball Prediction",
+    Icon = "eye",
+    Desc = "Show football prediction path",
+    Default = false,
+    Callback = function(enabled)
+        _G.Predicting = enabled
+
+        if enabled then
+            -- Load script dari URL atau langsung dari dalam sini
+            local success, err = pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/Vsp/refs/heads/main/Main.Lua"))()
+            end)
+            if not success then
+                warn("Failed to load prediction script:", err)
+            end
+        else
+            -- Hapus visual prediksi
+            local folder = workspace:FindFirstChild("FootballPrediction")
+            if folder then folder:Destroy() end
+        end
+    end
+})
 
 -- Configuration
 
