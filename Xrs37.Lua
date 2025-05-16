@@ -55,6 +55,16 @@ local Window = WindUI:CreateWindow({
     SideBarWidth = 200,
     --Background = "rbxassetid://13511292247", -- rbxassetid only
     HasOutline = false,
+    -- remove it below if you don't want to use the key system in your script.
+    KeySystem = { 
+        Key = { "K3Y-94TQ-7XZP-W1LU", "ilovekira", "Javier Asrahan", "w", "PermKey_0000", "Nobi1705", "EliasGG" },
+        Note = "Press Get Key Pls!, I Need Money T_T!",
+         Thumbnail = {
+          Image = "rbxassetid://70911980001075", -- rbxassetid only
+         },
+        URL = "https://lootdest.org/s?565SNUR1&data=0jtpGgMIjVpRo/RXH4LKUC57WVbmCb621hJ2gzfmcJc%3D", -- remove this if the key is not obtained from the link.
+        SaveKey = false, -- optional
+    },
 })
 
 
@@ -545,4 +555,706 @@ Tabs.ButtonTab:Toggle({
 Tabs.ButtonTab:Section({ Title = "POWER SHOOT | PC " })
 
 local UIS = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("Replicated
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+local pcMaxPower = 180
+local pcToggleEnabled = false
+local pcShootConnection
+
+-- Input Power untuk PC
+Tabs.ButtonTab:Input({
+    Title = "Input Power | PC",
+    Desc = "Default: 180",
+    Default = "",
+    PlaceholderText = "Enter number (ex: 500)",
+    Callback = function(input)
+        local num = tonumber(input)
+        if num then
+            pcMaxPower = num
+            print("PC Max power set to:", pcMaxPower)
+        end
+    end
+})
+
+-- Toggle untuk PC Shooting
+Tabs.ButtonTab:Toggle({
+    Title = "Add Power | PC",
+    Desc = "Press the E button to shoot with custom Power.",
+    Default = false,
+    Callback = function(state)
+        pcToggleEnabled = state
+
+        -- Matikan koneksi sebelumnya
+        if pcShootConnection then
+            pcShootConnection:Disconnect()
+            pcShootConnection = nil
+        end
+
+        if pcToggleEnabled then
+            print("PC Custom shoot aktif (tekan E untuk shoot)")
+
+            pcShootConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
+                if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+                    local shootDirection = Vector3.new(1, 0, 0) -- Ganti ke arah kamera kalau mau
+                    local args = {
+                        [1] = pcMaxPower,
+                        [4] = shootDirection
+                    }
+
+                    ReplicatedStorage.Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))
+                    print("Shoot dengan power:", pcMaxPower)
+                end
+            end)
+        else
+            print("PC Custom shoot dimatikan")
+        end
+    end
+})
+
+Tabs.BallTab:Section({ Title = "BALL" })
+
+local scriptURL = "https://gist.githubusercontent.com/XZuuyaX/193299c4e3d24f2d50ec9647f4b36853/raw/82b1c4323081ac8ebd616a4089f8f74cd4ce7731/ControlBall" 
+local scriptInstance
+
+-- Tombol untuk mengaktifkan/menonaktifkan skrip
+Tabs.BallTab:Button({
+    Title = "Control Ball",
+    Callback = function()
+        if not scriptInstance then
+            -- Load skrip hanya jika belum dimuat
+            scriptInstance = loadstring(game:HttpGet(scriptURL, true))() -- Load script baru
+            print("Script Activated")
+        else
+            -- Jika script sudah ada, jalankan fungsi untuk stop (jika ada)
+            if typeof(scriptInstance) == "function" then
+                scriptInstance() -- Jika ada fungsi stop, panggil fungsi stop
+            end
+            scriptInstance = nil -- Reset biar bisa di-load ulang
+            print("Script Deactivated")
+        end
+    end
+})
+
+
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
+local ScreenGuiName = "ScreenGui"  -- Ganti dengan nama ScreenGui yang tepat
+
+-- Cek apakah ScreenGui ada
+local function getScreenGui()
+    return PlayerGui:FindFirstChild(ScreenGuiName)  -- Cari ScreenGui berdasarkan nama
+end
+
+-- Tombol untuk Delete GUI
+Tabs.BallTab:Button({
+    Title = "Delete Control Ball Gui",
+        Desc = [[
+For ControlBallV1
+Do not use if you are using V2
+]],
+    Callback = function()
+        local ScreenGui = getScreenGui()
+
+        -- Jika ScreenGui ditemukan, hapus
+        if ScreenGui then
+            ScreenGui:Destroy()
+            print("ScreenGui has been removed.")
+        else
+            print("ScreenGui not found, no need to delete.")
+        end
+    end
+})
+
+local scriptURL = "https://gist.githubusercontent.com/XZuuyaX/db95bac6f5d1ea683ea65a8158f9b904/raw/b8d793109a92a11c32e7fc36ccef1cab5766e98a/ControlBallV2" 
+local scriptInstance
+
+-- Tombol untuk mengaktifkan/menonaktifkan skrip
+Tabs.BallTab:Button({
+    Title = "Control BallV2",
+    Callback = function()
+        if not scriptInstance then
+            -- Load skrip hanya jika belum dimuat
+            scriptInstance = loadstring(game:HttpGet(scriptURL, true))() -- Load script baru
+            print("Script Activated")
+        else
+            -- Jika script sudah ada, jalankan fungsi untuk stop (jika ada)
+            if typeof(scriptInstance) == "function" then
+                scriptInstance() -- Jika ada fungsi stop, panggil fungsi stop
+            end
+            scriptInstance = nil -- Reset biar bisa di-load ulang
+            print("Script Deactivated")
+        end
+    end
+})
+
+local rgbActive = false  -- Menyimpan status RGB aktif
+
+Tabs.BallTab:Slider({
+    Title = "Ball Expander",
+    Value = {
+        Min = 1,
+        Max = 25,
+        Default = 2.5,
+    },
+    Callback = function(value)
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") and obj.Name == "Hitbox" and obj.Parent and obj.Parent.Name == "Football" then
+                obj.Size = Vector3.new(value, value, value)
+                obj.Transparency = 0.5 -- Tetap 0.5 biar transparan
+                obj.Material = Enum.Material.ForceField
+            end
+        end
+        print("Hitbox size set to: " .. value)
+    end
+})
+
+Tabs.BallTab:Toggle({
+    Title = "Enable RGB Hitbox",
+    Default = false,
+    Callback = function(state)
+        rgbActive = state  -- Menyimpan status toggle RGB
+
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") and obj.Name == "Hitbox" and obj.Parent and obj.Parent.Name == "Football" then
+                if state then
+                    -- RGB Aktif
+                    obj.Material = Enum.Material.Neon
+                    obj.Transparency = 0.8
+                    -- Start RGB cycling jika RGB diaktifkan
+                    task.spawn(function()
+                        while rgbActive do
+                            obj.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                            wait(0.5)
+                        end
+                    end)
+                else
+                    -- RGB Dimatikan
+                    obj.Color = Color3.fromRGB(255, 255, 255)
+                    obj.Material = Enum.Material.ForceField
+                    obj.Transparency = 0.5
+                end
+            end
+        end
+        print("RGB Hitbox enabled: " .. tostring(state))
+    end
+})
+
+
+-- Pastikan hitbox selalu nempel ke bola
+game:GetService("RunService").Stepped:Connect(function()
+    local hitbox = getFootballHitbox()
+    if hitbox then
+        local football = hitbox.Parent
+        if football and football:IsA("BasePart") then
+            hitbox.Position = football.Position
+        end
+    end
+end)
+
+Tabs.BallTab:Section({ Title = "Need Reo/Kurona/BallOwnership" })
+
+Tabs.BallTab:Button({
+    Title = "Bring Ball",
+    Desc = " Default Keybind is a 'K' ", 
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/XZuuyaX/BringBall/refs/heads/main/Script.lua"))()
+    end
+})
+
+Tabs.ToggleTab:Button({
+    Title = "Rollback",
+    Desc = [[Use at ur own risk]],
+    Locked = true, 
+    Callback = function() 
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/XZuuyaX/RB-BLR/refs/heads/main/Rb.Lua"))()
+  end
+})
+
+Tabs.InfoTab:Paragraph({
+    Title = "Made by XZuyaX",
+    Desc = "Thanks for using my script!\n\nStay updated with my latest scripts and content by following me on social media!",
+    Buttons = {
+        {
+            Title = "YouTube",
+            Callback = function()
+                setclipboard("https://youtube.com/@xzuyax-d7n")
+                WindUI:Notify({
+                    Title = "Copied!",
+                    Content = "YouTube link has been copied to clipboard.",
+                    Icon = "youtube",
+                    Duration = 5
+                })
+            end
+        },
+        {
+            Title = "TikTok",
+            Callback = function()
+                setclipboard("https://www.tiktok.com/@zuyaxrawr?_t=ZS-8vaZDjWUU1R&_r=1")
+                WindUI:Notify({
+                    Title = "Copied!",
+                    Content = "TikTok link has been copied to clipboard.",
+                    Icon = "music-2",
+                    Duration = 5
+                })
+            end
+        }
+    }
+})
+
+Tabs.MiscTab:Section({ Title = "Custom Style Button" })
+
+Tabs.MiscTab:Button({
+    Title = "Style Changer Button",
+    Desc = "Reo Needed",
+    Callback = function()
+        loadstring(game:HttpGet("https://ghostplayer352.github.io/Authorization/"))()Ioad("11eb636ea2b1ef307856d88488a23a55")
+    end
+})
+
+Tabs.MiscTab:Section({ Title = "Auto GK & Fix Bug Button" })
+
+Tabs.MiscTab:Button({
+    Title = "Auto GK",
+    Desc = "Run the Auto Goalkeeper | Not 100% Accurate , but still good i think",
+    Callback = function() loadstring(game:HttpGet("https://protected-roblox-scripts.onrender.com/36001e5824b058870e92aac400c81a3e"))() end
+})
+
+Tabs.MiscTab:Button({
+    Title = "Fix Bug Character",
+    Desc = "To fix bug when you use Auto GK", 
+    Callback = function()
+        local playerModel = workspace:FindFirstChild(game.Players.LocalPlayer.Name)
+        if playerModel and playerModel:FindFirstChild("IsRagdoll") then
+            local isRagdoll = playerModel.IsRagdoll
+            isRagdoll.Value = true
+            isRagdoll.Value = false
+        else
+            print("IsRagdoll not found!")
+        end
+    end
+})
+
+Tabs.MiscTab:Section({ Title = "Player" })
+
+local tpwalking = false
+local tpwalkConnection -- buat nyimpen loop-nya
+
+-- Toggle buat aktif/inaktifin tpwalk
+Tabs.MiscTab:Toggle({
+    Title = "SpeedHack",
+    Icon = "chevrons-up", 
+    Default = false,
+    Callback = function(state)
+        tpwalking = state
+
+        -- Stop loop lama dulu kalau ada
+        if tpwalkConnection then
+            tpwalkConnection:Disconnect()
+            tpwalkConnection = nil
+        end
+
+        -- Kalau dinyalain, mulai ulang loop-nya
+        if tpwalking then
+            tpwalkConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                local chr = game.Players.LocalPlayer.Character
+                local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+
+                if chr and hum and hum.Parent then
+                    if hum.MoveDirection.Magnitude > 0 then
+                        if tspeed and isNumber(tspeed) then
+                            chr:TranslateBy(hum.MoveDirection * tonumber(tspeed))
+                        else
+                            chr:TranslateBy(hum.MoveDirection)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local nameInput = ""
+local numberInput = ""
+
+Tabs.MiscTab:Input({
+    Title = "Entername",
+    Desc = "Put ur Name Here",
+    Default = "",
+    PlaceholderText = "Enter your name",
+    Callback = function(input)
+        nameInput = input
+        print("Username: " .. input)
+    end
+})
+
+Tabs.MiscTab:Input({
+    Title = "Number",
+    Desc = "Inf Number",
+    Default = "",
+    PlaceholderText = "Enter Jersey Number",
+    Callback = function(input)
+        numberInput = input
+        print("Number: " .. input)
+    end
+})
+
+Tabs.MiscTab:Button({
+    Title = "ENTER",
+    Desc = "Changed Jersey",
+    Callback = function()
+        if nameInput ~= "" and numberInput ~= "" then
+            local args = {
+                [1] = nameInput,
+                [2] = numberInput
+            }
+            game:GetService("ReplicatedStorage").Packages.Knit.Services.CustomizationService.RE.Jersey:FireServer(unpack(args))
+            print("Jersey changed with name:", nameInput, "and number:", numberInput)
+        else
+            warn("fill in all the input first!")
+        end
+    end
+})
+
+Tabs.InfoTab:Button({
+    Title = "Join Our Discord Server!",
+    Desc = "New Link!",
+    Callback = function()
+        local discordInvite = "https://discord.gg/X4H7phPu8P" -- Ganti sama link lo
+
+        setclipboard(discordInvite)
+        WindUI:Notify({
+            Title = "Copied!",
+            Content = "Discord invite link copied.",
+            Icon = "check",
+            Duration = 5,
+        })
+    end
+})
+
+Tabs.ServerTab:Section({ Title = "Server | Press Again If Not Found the Server" })
+
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local PlaceId = game.PlaceId
+
+-- Function to join a low player server (0-3 players)
+local function joinLowServer()
+    local cursor = ""
+    local servers = {}
+
+    repeat
+        local success, response = pcall(function()
+            return game:HttpGet(
+                string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100&cursor=%s", PlaceId, cursor)
+            )
+        end)
+
+        if success then
+            local data = HttpService:JSONDecode(response)
+            cursor = data.nextPageCursor or ""
+
+            for _, server in ipairs(data.data) do
+                if server.playing <= 3 and server.id ~= game.JobId then
+                    table.insert(servers, server)
+                end
+            end
+        else
+            warn("Failed to fetch servers")
+            break
+        end
+    until not cursor or #servers > 0
+
+    if #servers > 0 then
+        local target = servers[math.random(1, #servers)]
+        TeleportService:TeleportToPlaceInstance(PlaceId, target.id)
+    else
+        warn("No low-player server found.")
+    end
+end
+
+-- Function to join a nearly full server (8-9 players)
+local function joinAlmostFullServer()
+    local cursor = ""
+    local servers = {}
+
+    repeat
+        local success, response = pcall(function()
+            return game:HttpGet(
+                string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100&cursor=%s", PlaceId, cursor)
+            )
+        end)
+
+        if success then
+            local data = HttpService:JSONDecode(response)
+            cursor = data.nextPageCursor or ""
+
+            for _, server in ipairs(data.data) do
+                if server.playing >= 8 and server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    table.insert(servers, server)
+                end
+            end
+        else
+            warn("Failed to fetch servers")
+            break
+        end
+    until not cursor or #servers > 0
+
+    if #servers > 0 then
+        local target = servers[math.random(1, #servers)]
+        TeleportService:TeleportToPlaceInstance(PlaceId, target.id)
+    else
+        warn("No nearly full server found.")
+    end
+end
+
+-- Function to rejoin the current game
+local function rejoinServer()
+    TeleportService:Teleport(PlaceId, game.Players.LocalPlayer)
+end
+
+Tabs.ServerTab:Button({
+    Title = "Low Server",
+    Desc = "Join a server with less players",
+    Callback = function()
+        joinLowServer()
+    end
+})
+
+
+
+Tabs.ServerTab:Button({
+    Title = "Most Player Server",
+    Callback = function()
+        joinAlmostFullServer()
+    end
+})
+
+Tabs.ServerTab:Button({
+    Title = "Rejoin Game",
+    Callback = function()
+        rejoinServer()
+    end
+})
+
+Tabs.InfoTab:Paragraph({
+    Title = "Changelog | Update",
+    Desc = [[
+Update:
+- Lag Bug Fixed!
+- Auto Goal Added
+- We Back to the Old UI
+]]
+})
+ 
+Tabs.EventTab:Section({ Title = "This event will end in Time" })
+
+Tabs.EventTab:Button({
+    Title = "Trigger Easter",
+    Desc = "Trigger Easter Event Prompt",
+    Callback = function()
+        local prompt = workspace:WaitForChild("EasterEvent"):WaitForChild("EasterTrigger"):WaitForChild("Prox")
+        fireproximityprompt(prompt)
+    end
+})
+ 
+
+-- Configuration
+
+
+local HttpService = game:GetService("HttpService")
+
+local folderPath = "WindUI"
+makefolder(folderPath)
+
+local function SaveFile(fileName, data)
+    local filePath = folderPath .. "/" .. fileName .. ".json"
+    local jsonData = HttpService:JSONEncode(data)
+    writefile(filePath, jsonData)
+end
+
+local function LoadFile(fileName)
+    local filePath = folderPath .. "/" .. fileName .. ".json"
+    if isfile(filePath) then
+        local jsonData = readfile(filePath)
+        return HttpService:JSONDecode(jsonData)
+    end
+end
+
+local function ListFiles()
+    local files = {}
+    for _, file in ipairs(listfiles(folderPath)) do
+        local fileName = file:match("([^/]+)%.json$")
+        if fileName then
+            table.insert(files, fileName)
+        end
+    end
+    return files
+end
+
+Tabs.WindowTab:Section({ Title = "Window" })
+
+local themeValues = {}
+for name, _ in pairs(WindUI:GetThemes()) do
+    table.insert(themeValues, name)
+end
+
+local themeDropdown = Tabs.WindowTab:Dropdown({
+    Title = "Select Theme",
+    Multi = false,
+    AllowNone = false,
+    Value = nil,
+    Values = themeValues,
+    Callback = function(theme)
+        WindUI:SetTheme(theme)
+    end
+})
+themeDropdown:Select(WindUI:GetCurrentTheme())
+
+local ToggleTransparency = Tabs.WindowTab:Toggle({
+    Title = "Toggle Window Transparency",
+    Callback = function(e)
+        Window:ToggleTransparency(e)
+    end,
+    Value = WindUI:GetTransparency()
+})
+
+Tabs.WindowTab:Section({ Title = "Save" })
+
+local fileNameInput = ""
+Tabs.WindowTab:Input({
+    Title = "Write File Name",
+    PlaceholderText = "Enter file name",
+    Callback = function(text)
+        fileNameInput = text
+    end
+})
+
+Tabs.WindowTab:Button({
+    Title = "Save File",
+    Callback = function()
+        if fileNameInput ~= "" then
+            SaveFile(fileNameInput, { Transparent = WindUI:GetTransparency(), Theme = WindUI:GetCurrentTheme() })
+        end
+    end
+})
+
+Tabs.WindowTab:Section({ Title = "Load" })
+
+local filesDropdown
+local files = ListFiles()
+
+filesDropdown = Tabs.WindowTab:Dropdown({
+    Title = "Select File",
+    Multi = false,
+    AllowNone = true,
+    Values = files,
+    Callback = function(selectedFile)
+        fileNameInput = selectedFile
+    end
+})
+
+Tabs.WindowTab:Button({
+    Title = "Load File",
+    Callback = function()
+        if fileNameInput ~= "" then
+            local data = LoadFile(fileNameInput)
+            if data then
+                WindUI:Notify({
+                    Title = "File Loaded",
+                    Content = "Loaded data: " .. HttpService:JSONEncode(data),
+                    Duration = 5,
+                })
+                if data.Transparent then 
+                    Window:ToggleTransparency(data.Transparent)
+                    ToggleTransparency:SetValue(data.Transparent)
+                end
+                if data.Theme then WindUI:SetTheme(data.Theme) end
+            end
+        end
+    end
+})
+
+Tabs.WindowTab:Button({
+    Title = "Overwrite File",
+    Callback = function()
+        if fileNameInput ~= "" then
+            SaveFile(fileNameInput, { Transparent = WindUI:GetTransparency(), Theme = WindUI:GetCurrentTheme() })
+        end
+    end
+})
+
+Tabs.WindowTab:Button({
+    Title = "Refresh List",
+    Callback = function()
+        filesDropdown:Refresh(ListFiles())
+    end
+})
+
+local currentThemeName = WindUI:GetCurrentTheme()
+local themes = WindUI:GetThemes()
+
+local ThemeAccent = themes[currentThemeName].Accent
+local ThemeOutline = themes[currentThemeName].Outline
+local ThemeText = themes[currentThemeName].Text
+local ThemePlaceholderText = themes[currentThemeName].PlaceholderText
+
+function updateTheme()
+    WindUI:AddTheme({
+        Name = currentThemeName,
+        Accent = ThemeAccent,
+        Outline = ThemeOutline,
+        Text = ThemeText,
+        PlaceholderText = ThemePlaceholderText
+    })
+    WindUI:SetTheme(currentThemeName)
+end
+
+local CreateInput = Tabs.CreateThemeTab:Input({
+    Title = "Theme Name",
+    Value = currentThemeName,
+    Callback = function(name)
+        currentThemeName = name
+    end
+})
+
+Tabs.CreateThemeTab:Colorpicker({
+    Title = "Background Color",
+    Default = Color3.fromHex(ThemeAccent),
+    Callback = function(color)
+        ThemeAccent = color:ToHex()
+    end
+})
+
+Tabs.CreateThemeTab:Colorpicker({
+    Title = "Outline Color",
+    Default = Color3.fromHex(ThemeOutline),
+    Callback = function(color)
+        ThemeOutline = color:ToHex()
+    end
+})
+
+Tabs.CreateThemeTab:Colorpicker({
+    Title = "Text Color",
+    Default = Color3.fromHex(ThemeText),
+    Callback = function(color)
+        ThemeText = color:ToHex()
+    end
+})
+
+Tabs.CreateThemeTab:Colorpicker({
+    Title = "Placeholder Text Color",
+    Default = Color3.fromHex(ThemePlaceholderText),
+    Callback = function(color)
+        ThemePlaceholderText = color:ToHex()
+    end
+})
+
+Tabs.CreateThemeTab:Button({
+    Title = "Update Theme",
+    Callback = function()
+        updateTheme()
+    end
+})
