@@ -1060,7 +1060,6 @@ Tabs.VisualTab:Toggle({
         _G.Predicting = enabled
 
         if enabled then
-            -- Load script dari URL atau langsung dari dalam sini
             local success, err = pcall(function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/Vsp/refs/heads/main/Main.Lua"))()
             end)
@@ -1068,7 +1067,6 @@ Tabs.VisualTab:Toggle({
                 warn("Failed to load prediction script:", err)
             end
         else
-            -- Hapus visual prediksi
             local folder = workspace:FindFirstChild("FootballPrediction")
             if folder then folder:Destroy() end
         end
