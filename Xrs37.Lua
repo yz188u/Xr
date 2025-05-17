@@ -554,6 +554,7 @@ local player = Players.LocalPlayer
 local pcMaxPower = 180
 local pcToggleEnabled = false
 local pcShootConnection
+local keybind = Enum.KeyCode.E -- Default key
 
 -- Input Power untuk PC
 Tabs.ButtonTab:Input({
@@ -570,10 +571,31 @@ Tabs.ButtonTab:Input({
     end
 })
 
+-- Input Keybind
+Tabs.ButtonTab:Input({
+    Title = "Keybind | PC",
+    Desc = "Default: E",
+    Default = "",
+    PlaceholderText = "Enter key (ex: E, Q, R)",
+    Callback = function(input)
+        local upperInput = input:upper()
+        local success, newKey = pcall(function()
+            return Enum.KeyCode[upperInput]
+        end)
+
+        if success and newKey then
+            keybind = newKey
+            print("Keybind changed to:", keybind.Name)
+        else
+            warn("Invalid key:", input)
+        end
+    end
+})
+
 -- Toggle untuk PC Shooting
 Tabs.ButtonTab:Toggle({
     Title = "Add Power | PC",
-    Desc = "Press the E button to shoot with custom Power.",
+    Desc = "Use keybinds for custom shoots.",
     Default = false,
     Callback = function(state)
         pcToggleEnabled = state
@@ -585,10 +607,10 @@ Tabs.ButtonTab:Toggle({
         end
 
         if pcToggleEnabled then
-            print("PC Custom shoot aktif (tekan E untuk shoot)")
+            print("PC Custom shoot active (press " .. keybind.Name .. " to shoot)")
 
             pcShootConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
-                if not gameProcessed and input.KeyCode == Enum.KeyCode.E then
+                if not gameProcessed and input.KeyCode == keybind then
                     local shootDirection = Vector3.new(1, 0, 0) -- Ganti ke arah kamera kalau mau
                     local args = {
                         [1] = pcMaxPower,
@@ -596,11 +618,11 @@ Tabs.ButtonTab:Toggle({
                     }
 
                     ReplicatedStorage.Packages.Knit.Services.BallService.RE.Shoot:FireServer(unpack(args))
-                    print("Shoot dengan power:", pcMaxPower)
+                    print("Shoot with power:", pcMaxPower)
                 end
             end)
         else
-            print("PC Custom shoot dimatikan")
+            print("PC Custom shoot is disabled")
         end
     end
 })
@@ -1060,6 +1082,7 @@ Tabs.VisualTab:Toggle({
         _G.Predicting = enabled
 
         if enabled then
+            -- Load script dari URL atau langsung dari dalam sini
             local success, err = pcall(function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/Vsp/refs/heads/main/Main.Lua"))()
             end)
@@ -1067,6 +1090,7 @@ Tabs.VisualTab:Toggle({
                 warn("Failed to load prediction script:", err)
             end
         else
+            -- Hapus visual prediksi
             local folder = workspace:FindFirstChild("FootballPrediction")
             if folder then folder:Destroy() end
         end
