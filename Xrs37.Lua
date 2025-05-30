@@ -1062,7 +1062,7 @@ Tabs.MiscTab:Button({
     Title = "Style Changer Button",
     Desc = "Reo Needed",
     Callback = function()
-        loadstring(game:HttpGet("https://ghostplayer352.github.io/Authorization/"))()Ioad("11eb636ea2b1ef307856d88488a23a55")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/Stm/refs/heads/main/Main.lua", true))()
     end
 })
 
