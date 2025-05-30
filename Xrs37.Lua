@@ -584,6 +584,14 @@ Tabs.ButtonTab:Button({
     end
 })
 
+Tabs.ButtonTab:Button({
+    Title = "Money Farm V2 | Faster",
+    Desc = "For high end devices, Cz it's Very Laggy.", 
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/MFarm/refs/heads/main/faster.luau"))()
+    end
+})
+
 Tabs.ButtonTab:Toggle({
     Title = "Infinite Awakening",
     Icon = "infinity", 
