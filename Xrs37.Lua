@@ -1071,7 +1071,7 @@ Tabs.MiscTab:Section({ Title = "Players" })
 Tabs.MiscTab:Button({
     Title = "Auto GK",
     Desc = "Run the Auto Goalkeeper | Not 100% Accurate , but still good i think",
-    Callback = function() loadstring(game:HttpGet("https://protected-roblox-scripts.onrender.com/36001e5824b058870e92aac400c81a3e"))() end
+    Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/agk/main/main.luau", true))() end
 })
 
 Tabs.MiscTab:Button({
