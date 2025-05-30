@@ -71,7 +71,6 @@ Window:EditOpenButton({
     Draggable = true,
 })
 
-
 local Tabs = {
     InfoTab = Window:Tab({ Title = "Home", Icon = "house", Desc = "Information about the creator." }),
     ButtonTab = Window:Tab({ Title = "Main", Icon = "computer", Desc = "Contains interactive buttons for various actions." }),
@@ -156,7 +155,245 @@ for _, styleName in ipairs(styles) do
     end)
 end
 
-Tabs.ButtonTab:Section({ Title = "AUTO GOAL & MONEY FARM" })
+Tabs.ButtonTab:Section({ Title = "▸ Team & Role Selection" })
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local Knit = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit")
+local TeamService = Knit.Services:WaitForChild("TeamService")
+local selectEvent = TeamService.RE.Select
+local teamsFolder = ReplicatedStorage:WaitForChild("Teams")
+
+local selectedTeam = "Home" -- or "Away"
+local selectedPosition = "RW" -- CF, RW, LW, CM, GK
+local autoSelectEnabled = false
+local connection
+
+-- Check if the player's name matches the ObjectValue in the position
+local function HasPosition()
+	local team = teamsFolder:FindFirstChild(selectedTeam .. "Team")
+	if not team then return false end
+
+	local role = team:FindFirstChild(selectedPosition)
+	if not role then return false end
+
+	-- Compare ObjectValue with local player
+	return role.Value == player
+end
+
+-- Toggle spam on or off
+local function ToggleAutoSelect(state)
+	autoSelectEnabled = state
+
+	if state then
+		connection = RunService.RenderStepped:Connect(function()
+			local currentTeam = player.Team and player.Team.Name or "Visitor"
+
+			if currentTeam == "Visitor" or not HasPosition() then
+				selectEvent:FireServer(selectedTeam, selectedPosition)
+			end
+		end)
+	else
+		if connection then
+			connection:Disconnect()
+			connection = nil
+		end
+	end
+end
+
+-- Example Dropdown & Toggle for UI Library
+Tabs.ButtonTab:Dropdown({
+	Title = "Select Team",
+	Desc = "Choose team",
+	Values = { "Home", "Away" },
+	Value = "Home",
+	Callback = function(option)
+		selectedTeam = option
+	end
+})
+
+Tabs.ButtonTab:Dropdown({
+	Title = "Select Position",
+	Desc = "Choose your role",
+	Values = { "CF", "CM", "RW", "LW", "GK" },
+	Value = "RW",
+	Callback = function(option)
+		selectedPosition = option
+	end
+})
+
+Tabs.ButtonTab:Toggle({
+	Title = "Auto Select Role",
+	Default = false,
+	Callback = function(state)
+		ToggleAutoSelect(state)
+	end
+})
+
+Tabs.ButtonTab:Section({ Title = "▸ Custom Shot" })
+
+local Players = game:GetService("Players")      
+local RunService = game:GetService("RunService")      
+local L = Players.LocalPlayer      
+
+-- === PENGATURAN ===      
+local zigzagAmplitude = 3           -- Jarak atas-bawah zigzag      
+local zigzagSpeed = 100             -- Kecepatan zigzag vertikal      
+local basePower = 500              -- Kecepatan utama bola ke gawang      
+
+-- === GAWANG (Bagian bawah aja) ===      
+local homeGoal = {      
+	Vector3.new(317, 11, -30),      
+	Vector3.new(315, 11, -67)      
+}      
+local awayGoal = {      
+	Vector3.new(-238, 11, -69),      
+	Vector3.new(-238, 11, -33)      
+}      
+
+-- Status toggle
+local snakeActive = false
+local startTime = tick()
+local targetGoal = nil
+
+-- Input GUI untuk pengaturan Snake Shoot
+Tabs.ButtonTab:Input({
+    Title = "Base Power",
+    Desc = "Ball Speed to the Goal",
+    PlaceholderText = "Default: 500",
+    Callback = function(text)
+        local value = tonumber(text)
+        if value then basePower = value end
+    end
+})
+
+Tabs.ButtonTab:Input({
+    Title = "Zig-Zag Speed",
+    Desc = "Vertical Zig-Zag speed",
+    PlaceholderText = "Default: 100",
+    Callback = function(text)
+        local value = tonumber(text)
+        if value then zigzagSpeed = value end
+    end
+})
+
+Tabs.ButtonTab:Input({
+    Title = "Zig-Zag Range",
+    Desc = "Zig-Zag up-down Range",
+    PlaceholderText = "Default: 3",
+    Callback = function(text)
+        local value = tonumber(text)
+        if value then zigzagAmplitude = value end
+    end
+})
+
+-- Toggle GUI
+Tabs.ButtonTab:Toggle({
+    Title = "Snake Shoot",
+    Desc = "Turn on to use the Snake Shoot",
+    Default = false,
+    Callback = function(state)
+        snakeActive = state
+        startTime = tick()
+    end
+})
+
+-- Snake Shoot Loop
+RunService.Heartbeat:Connect(function()    
+	if not snakeActive then return end
+
+	local char = L.Character    
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end    
+	local ball = workspace:FindFirstChild("Football")    
+	if not ball then return end    
+
+	-- Ganti target tiap 0.1 detik biar gak ngunci 1 titik
+	if tick() - startTime > 0.1 then
+		startTime = tick()
+		local team = tostring(L.Team)
+		local goalList = (team == "Home") and awayGoal or homeGoal
+		targetGoal = goalList[math.random(1, #goalList)]
+	end
+
+	if not targetGoal then return end
+
+	local dirToGoal = (targetGoal - ball.Position).Unit
+	local timeNow = tick() - startTime
+	local verticalOffset = math.sin(timeNow * zigzagSpeed) * zigzagAmplitude
+	local zigzagVector = Vector3.new(0, verticalOffset, 0)
+	local finalDirection = (dirToGoal + zigzagVector).Unit
+
+	ball.AssemblyLinearVelocity = finalDirection * basePower
+	ball.AssemblyAngularVelocity = Vector3.zero
+	ball.AssemblyGravityScale = 0
+end)
+
+Tabs.ButtonTab:Section({ Title = "▸ Game Enhancers" })
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local AbilityService = RS.Packages.Knit.Services.AbilityService.RE.Ability
+
+local autoSteal = false
+
+local function triggerAbility(targetChar)
+    local args = {
+        [1] = "DestroyersDomain",
+        [2] = {
+            ["Enemy"] = targetChar
+        }
+    }
+    AbilityService:FireServer(unpack(args))
+end
+
+
+local function checkAll()
+    if not autoSteal then return end
+
+
+    for _, player in pairs(Players:GetPlayers()) do
+        local char = player.Character
+        if char and char:FindFirstChild("Football") then
+            triggerAbility(char)
+        end
+    end
+
+    local ai = workspace:FindFirstChild("AI")
+    if ai then
+        local gkAway = ai:FindFirstChild("Away") and ai.Away:FindFirstChild("GK")
+        local gkHome = ai:FindFirstChild("Home") and ai.Home:FindFirstChild("GK")
+
+        if gkAway and gkAway:FindFirstChild("Football") then
+            triggerAbility(gkAway)
+        end
+
+        if gkHome and gkHome:FindFirstChild("Football") then
+            triggerAbility(gkHome)
+        end
+    end
+end
+
+-- Toggle UI
+Tabs.ButtonTab:Toggle({
+    Title = "Auto Steal 100%",
+    Desc = "Must have Reo",
+    Icon = "target",
+    Default = false,
+    Callback = function(state)
+        autoSteal = state
+    end
+})
+
+-- Loop pengecekan
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        checkAll()
+    end
+end)
 
 -- Listener global hapus Attachment/Attachment1 kapanpun bola muncul
 task.spawn(function()
@@ -347,8 +584,6 @@ Tabs.ButtonTab:Button({
     end
 })
 
-Tabs.ButtonTab:Section({ Title = "Main" })
-
 Tabs.ButtonTab:Toggle({
     Title = "Infinite Awakening",
     Icon = "infinity", 
@@ -406,6 +641,8 @@ Tabs.ButtonTab:Button({
     Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XZuuyaX/NoCD/refs/heads/main/Main", true))() end
 })
 
+Tabs.ButtonTab:Section({ Title = "▸ Style & Flow Features" })
+
 Tabs.ButtonTab:Toggle({
     Title = "Get Flow Buff | Inf Flow",
     Icon = "flame",
@@ -450,6 +687,8 @@ Tabs.ButtonTab:Dropdown({
     end
 })
 
+Tabs.ButtonTab:Section({ Title = "▸ Dribble Controls" })
+
 local AutoDribbleLoaded = false
 
 Tabs.ButtonTab:Toggle({
@@ -481,7 +720,7 @@ Tabs.ButtonTab:Input({
     end
 })
 
-Tabs.ButtonTab:Section({ Title = "POWER SHOOT | MOBILE " })
+Tabs.ButtonTab:Section({ Title = "▸ POWER SETTINGS | MOBILE" })
 
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
@@ -543,7 +782,7 @@ Tabs.ButtonTab:Toggle({
     end
 })
 
-Tabs.ButtonTab:Section({ Title = "POWER SHOOT | PC " })
+Tabs.ButtonTab:Section({ Title = "▸ POWER SETTINGS | PC" })
 
 local UIS = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -634,7 +873,7 @@ local scriptInstance
 
 -- Tombol untuk mengaktifkan/menonaktifkan skrip
 Tabs.BallTab:Button({
-    Title = "Control Ball",
+    Title = "Control Ballv1",
     Callback = function()
         if not scriptInstance then
             -- Load skrip hanya jika belum dimuat
@@ -827,7 +1066,7 @@ Tabs.MiscTab:Button({
     end
 })
 
-Tabs.MiscTab:Section({ Title = "Auto GK & Fix Bug Button" })
+Tabs.MiscTab:Section({ Title = "Players" })
 
 Tabs.MiscTab:Button({
     Title = "Auto GK",
@@ -850,7 +1089,7 @@ Tabs.MiscTab:Button({
     end
 })
 
-Tabs.MiscTab:Section({ Title = "Player" })
+
 
 local tpwalking = false
 local tpwalkConnection -- buat nyimpen loop-nya
@@ -1056,9 +1295,9 @@ Tabs.InfoTab:Paragraph({
     Title = "Changelog | Update",
     Desc = [[
 Update:
-- Lag Bug Fixed!
-- Auto Goal Added
-- We Back to the Old UI
+- Snakeshoot
+- Robux BLR Emotes (NEW)
+- Bug Fixed!
 ]]
 })
  
@@ -1072,7 +1311,48 @@ Tabs.EventTab:Button({
         fireproximityprompt(prompt)
     end
 })
- 
+
+Tabs.VisualTab:Button({
+    Title = "Robux BLR Emote",
+    Desc = "This is just a Visual.", 
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/EmtBlr/refs/heads/main/main.luau"))()
+    end
+})
+
+Tabs.VisualTab:Button({
+Title = "Delete Emotes GUI",
+Desc = "If u want to delete the GUI (Only GUI)",
+Callback = function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    -- Hapus GUI dari CoreGui
+    local coreGui = game:GetService("CoreGui")
+    local emoteGui = coreGui:FindFirstChild("EmoteGuiExecutor")
+    if emoteGui then
+        emoteGui:Destroy()
+    end
+
+    -- Hentikan semua animasi
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop()
+        end
+    end
+
+    -- Hapus semua VFX & Sound di karakter
+    for _, descendant in pairs(character:GetDescendants()) do
+        if descendant:IsA("ParticleEmitter") or descendant:IsA("Beam") or descendant:IsA("Trail") or descendant:IsA("Sound") then
+            descendant:Destroy()
+        end
+    end
+
+    print("GUI, Animasi, VFX, dan Sound berhasil dihapus.")
+end
+})
+
 Tabs.VisualTab:Toggle({
     Title = "Visual Ball Prediction",
     Icon = "eye",
