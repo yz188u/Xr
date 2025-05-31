@@ -1,6 +1,6 @@
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/XZuuyaX/Wind/refs/heads/main/WindUI/dist/main.lua"))()
 
-function gradient(text, startColor, endColor)
+local function gradient(text, startColor, endColor)
     local result = ""
     local length = #text
 
@@ -11,7 +11,7 @@ function gradient(text, startColor, endColor)
         local b = math.floor((startColor.B + (endColor.B - startColor.B) * t) * 255)
 
         local char = text:sub(i, i)
-        result = result .. "<font color=\"rgb(" .. r ..", " .. g .. ", " .. b .. ")\">" .. char .. "</font>"
+        result = result .. string.format("<font color=\"rgb(%d, %d, %d)\">%s</font>", r, g, b, char)
     end
 
     return result
@@ -19,30 +19,67 @@ end
 
 local Confirmed = false
 
+-- Popup Welcome
 WindUI:Popup({
     Title = "Welcome to XZuyaX's HUB!",
     Icon = "info",
-    Content = "Thanks for Using".. gradient(" XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")) .. "!" ,
+    Content = "Thanks for Using" .. gradient(" XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")) .. "!",
     Buttons = {
         {
             Title = "Cancel",
-            --Icon = "",
             Callback = function() end,
-            Variant = "Tertiary", -- Primary, Secondary, Tertiary
+            Variant = "Tertiary",
         },
         {
             Title = "Continue",
             Icon = "arrow-right",
             Callback = function() Confirmed = true end,
-            Variant = "Primary", -- Primary, Secondary, Tertiary
+            Variant = "Primary",
         }
     }
 })
 
+repeat task.wait() until Confirmed
 
-repeat wait() until Confirmed
+-- Pantau dan hapus Window.Frame kalau muncul
+task.spawn(function()
+    while true do
+        task.wait(0.1) -- cek setiap 0.1 detik
+        local success, result = pcall(function()
+            local windUI = game:GetService("CoreGui"):FindFirstChild("WindUI")
+            local window = windUI and windUI:FindFirstChild("Window")
+            local frame = window and window:FindFirstChild("Frame")
+            if frame then
+                frame:Destroy()
+            end
+        end)
+        -- Stop loop kalau sudah berhasil dihapus
+        if success and result == nil then break end
+    end
+end)
 
---
+-- Tombol kecil pojok (Logo Atlas)
+local gui = Instance.new("ScreenGui")
+local logoBtn = Instance.new("ImageButton")
+local corner = Instance.new("UICorner")
+
+gui.Parent = game.CoreGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+logoBtn.Parent = gui
+logoBtn.BackgroundTransparency = 1
+logoBtn.BorderSizePixel = 0
+logoBtn.Position = UDim2.new(0, 10, 0.5, -22)
+logoBtn.Size = UDim2.new(0, 45, 0, 45)
+logoBtn.Image = "http://www.roblox.com/asset/?id=122990312323150"
+logoBtn.Draggable = true
+
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = logoBtn
+
+logoBtn.MouseButton1Down:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.G, false, game)
+end)
 
 local Window = WindUI:CreateWindow({
     Title = gradient("XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")), 
@@ -54,22 +91,9 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     SideBarWidth = 200,
     --Background = "rbxassetid://13511292247", -- rbxassetid only
-    HasOutline = false,
+    HasOutline = false
 })
 
-
-Window:EditOpenButton({
-    Title = gradient("XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")),
-    Icon = "crown",
-    CornerRadius = UDim.new(0,10),
-    StrokeThickness = 2,
-    Color = ColorSequence.new( -- gradient
-        Color3.fromHex("FF0F7B"), 
-        Color3.fromHex("F89B29")
-    ),
-    --Enabled = false,
-    Draggable = true,
-})
 
 local Tabs = {
     InfoTab = Window:Tab({ Title = "Home", Icon = "house", Desc = "Information about the creator." }),
