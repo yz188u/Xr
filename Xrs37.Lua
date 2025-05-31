@@ -1541,6 +1541,16 @@ Tabs.WindowTab:Button({
     end
 })
 
+Tabs.WindowTab:Button({
+    Title = "Hide The Open/Hide Icon",
+    Desc = "You can still click on it to open the script but it will be invisible",
+    Callback = function()
+        if logoBtn then
+            logoBtn.Image = ""
+        end
+    end
+})
+
 local currentThemeName = WindUI:GetCurrentTheme()
 local themes = WindUI:GetThemes()
 
