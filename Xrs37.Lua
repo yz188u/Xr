@@ -357,6 +357,138 @@ end)
 
 Tabs.ButtonTab:Section({ Title = "▸ Game Enhancers" })
 
+local AutoSlideV1 = {}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BallService = ReplicatedStorage.Packages.Knit.Services.BallService.RE
+local LocalPlayer = Players.LocalPlayer
+
+local autoSlideOn = false
+local slideDistance = 25
+local lastSlide = 0
+local cooldown = 0
+
+function AutoSlideV1.SetActive(state)
+	autoSlideOn = state
+end
+
+function AutoSlideV1.Start()
+	spawn(function()
+		while true do
+			task.wait(0.2)
+			if not autoSlideOn then continue end
+
+			local holder = nil
+			for _, player in pairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Football") then
+					holder = player
+					break
+				end
+			end
+
+			if holder and holder.Character and holder.Character:FindFirstChild("HumanoidRootPart") then
+				local myChar = LocalPlayer.Character
+				if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+					local dist = (myChar.HumanoidRootPart.Position - holder.Character.HumanoidRootPart.Position).Magnitude
+					if dist <= slideDistance and tick() - lastSlide >= cooldown then
+						BallService.Slide:FireServer()
+						lastSlide = tick()
+					end
+				end
+			end
+		end
+	end)
+end
+
+Tabs.ButtonTab:Toggle({
+	Title = "Aura Slide",
+        Desc = [[ 
+Get Close to the Enemy 
+'You can combine it with Ball Expander'
+]],
+	Default = false,
+	Callback = function(state)
+		AutoSlideV1.SetActive(state)
+	end
+})
+
+AutoSlideV1.Start()
+
+-- Buat "modul" AutoSlide di dalam satu file
+local AutoSlide = {}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BallService = ReplicatedStorage.Packages.Knit.Services.BallService.RE
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+
+local autoSlideOn = false
+local slideDistance = 25
+local lastSlide = 0
+local cooldown = 0
+local previousDribbling = {}
+
+function AutoSlide.SetActive(state)
+    autoSlideOn = state
+end
+
+function AutoSlide.Start()
+    spawn(function()
+        while true do
+            task.wait()
+            if not autoSlideOn then continue end
+
+            local holder = nil
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Football") then
+                    holder = player
+                    break
+                end
+            end
+
+            if holder and holder.Character and holder.Character:FindFirstChild("HumanoidRootPart") then
+                local myChar = LocalPlayer.Character
+                if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                    local dist = (myChar.HumanoidRootPart.Position - holder.Character.HumanoidRootPart.Position).Magnitude
+
+                    local wsChar = Workspace:FindFirstChild(holder.Name)
+                    local dribbling = wsChar and wsChar:FindFirstChild("Values") and wsChar.Values:FindFirstChild("Dribbling")
+
+                    if dribbling then
+                        local prev = previousDribbling[holder.Name]
+                        local now = dribbling.Value
+
+                        if prev == true and now == false and dist <= slideDistance and tick() - lastSlide >= cooldown then
+                            task.delay(0, function()
+                                if holder.Character and holder.Character:FindFirstChild("Football") then
+                                    BallService.Slide:FireServer()
+                                    lastSlide = tick()
+                                end
+                            end)
+                        end
+
+                        previousDribbling[holder.Name] = now
+                    end
+                end
+            end
+        end
+    end)
+end
+
+Tabs.ButtonTab:Toggle({
+    Title = "Aura SlideV2",
+    Desc = [[ 
+Get Close to the Enemy 
+'This will auto slide when the enemy has dribbled.'
+]],
+    Default = false,
+    Callback = function(state)
+        AutoSlide.SetActive(state)
+    end
+})
+
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local AbilityService = RS.Packages.Knit.Services.AbilityService.RE.Ability
