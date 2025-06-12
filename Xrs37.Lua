@@ -17,47 +17,6 @@ local function gradient(text, startColor, endColor)
     return result
 end
 
-local Confirmed = false
-
--- Popup Welcome
-WindUI:Popup({
-    Title = "Welcome to XZuyaX's HUB!",
-    Icon = "info",
-    Content = "Thanks for Using" .. gradient(" XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")) .. "!",
-    Buttons = {
-        {
-            Title = "Cancel",
-            Callback = function() end,
-            Variant = "Tertiary",
-        },
-        {
-            Title = "Continue",
-            Icon = "arrow-right",
-            Callback = function() Confirmed = true end,
-            Variant = "Primary",
-        }
-    }
-})
-
-repeat task.wait() until Confirmed
-
--- Pantau dan hapus Window.Frame kalau muncul
-task.spawn(function()
-    while true do
-        task.wait(0.1) -- cek setiap 0.1 detik
-        local success, result = pcall(function()
-            local windUI = game:GetService("CoreGui"):FindFirstChild("WindUI")
-            local window = windUI and windUI:FindFirstChild("Window")
-            local frame = window and window:FindFirstChild("Frame")
-            if frame then
-                frame:Destroy()
-            end
-        end)
-        -- Stop loop kalau sudah berhasil dihapus
-        if success and result == nil then break end
-    end
-end)
-
 -- Tombol kecil pojok (Logo Atlas)
 local gui = Instance.new("ScreenGui")
 local logoBtn = Instance.new("ImageButton")
@@ -85,15 +44,24 @@ local Window = WindUI:CreateWindow({
     Title = gradient("XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")), 
     Icon = "crown",
     Author = "Zuya",
-    Folder = "CloudHub",
+    Folder = "XZuyaX's Hub",
     Size = UDim2.fromOffset(435, 345),
     Transparent = true,
     Theme = "Dark",
-    SideBarWidth = 200,
-    --Background = "rbxassetid://13511292247", -- rbxassetid only
-    HasOutline = false
-})
 
+    --Background = "rbxassetid://13511292247", -- rbxassetid only
+    HasOutline = false,
+    -- remove it below if you don't want to use the key system in your script.
+    KeySystem = { 
+        Key = { "ZuyaNeedMoney", "ilovekira", "Javier Asrahan", "w", "PermKey_0000", "Nobi1705", "EliasGG", "VengadorPrime", "Yaqama", "KEY_Perm10", "pgu245", "AKiLyAs", "NagiTheTester", "LunaPerm", "Diddy" },
+        Note = "Press Get Key Pls!, I Need Money T_T!",
+         Thumbnail = {
+          Image = "rbxassetid://122990312323150", -- rbxassetid only
+         },
+        URL = "https://discord.gg/645Xg2wey7", -- remove this if the key is not obtained from the link.
+        SaveKey = false, -- optional
+    },
+})
 
 local Tabs = {
     InfoTab = Window:Tab({ Title = "Home", Icon = "house", Desc = "Information about the creator." }),
@@ -259,101 +227,30 @@ Tabs.ButtonTab:Toggle({
 
 Tabs.ButtonTab:Section({ Title = "▸ Custom Shot" })
 
-local Players = game:GetService("Players")      
-local RunService = game:GetService("RunService")      
-local L = Players.LocalPlayer      
-
--- === PENGATURAN ===      
-local zigzagAmplitude = 3           -- Jarak atas-bawah zigzag      
-local zigzagSpeed = 100             -- Kecepatan zigzag vertikal      
-local basePower = 500              -- Kecepatan utama bola ke gawang      
-
--- === GAWANG (Bagian bawah aja) ===      
-local homeGoal = {      
-	Vector3.new(317, 11, -30),      
-	Vector3.new(315, 11, -67)      
-}      
-local awayGoal = {      
-	Vector3.new(-238, 11, -69),      
-	Vector3.new(-238, 11, -33)      
-}      
-
--- Status toggle
-local snakeActive = false
-local startTime = tick()
-local targetGoal = nil
-
--- Input GUI untuk pengaturan Snake Shoot
-Tabs.ButtonTab:Input({
-    Title = "Base Power",
-    Desc = "Ball Speed to the Goal",
-    PlaceholderText = "Default: 500",
-    Callback = function(text)
-        local value = tonumber(text)
-        if value then basePower = value end
+Tabs.ButtonTab:Button({
+    Title = "SnakeShoot",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yz188u/SnkSht/main/main.luau"))()
     end
 })
 
 Tabs.ButtonTab:Input({
-    Title = "Zig-Zag Speed",
-    Desc = "Vertical Zig-Zag speed",
-    PlaceholderText = "Default: 100",
+    Title = "Input Keybind",
+    Desc = "Keybind For On/Off Snakeshoot",
+    PlaceholderText = "Default: T",
     Callback = function(text)
-        local value = tonumber(text)
-        if value then zigzagSpeed = value end
+        local success, keycode = pcall(function()
+            return Enum.KeyCode[text:upper()]
+        end)
+
+        if success and keycode then
+            shared.SnakeShootKeybind = keycode
+        else
+            warn("Invalid keybind: " .. tostring(text))
+        end
     end
 })
 
-Tabs.ButtonTab:Input({
-    Title = "Zig-Zag Range",
-    Desc = "Zig-Zag up-down Range",
-    PlaceholderText = "Default: 3",
-    Callback = function(text)
-        local value = tonumber(text)
-        if value then zigzagAmplitude = value end
-    end
-})
-
--- Toggle GUI
-Tabs.ButtonTab:Toggle({
-    Title = "Snake Shoot",
-    Desc = "Turn on to use the Snake Shoot",
-    Default = false,
-    Callback = function(state)
-        snakeActive = state
-        startTime = tick()
-    end
-})
-
--- Snake Shoot Loop
-RunService.Heartbeat:Connect(function()    
-	if not snakeActive then return end
-
-	local char = L.Character    
-	if not char or not char:FindFirstChild("HumanoidRootPart") then return end    
-	local ball = workspace:FindFirstChild("Football")    
-	if not ball then return end    
-
-	-- Ganti target tiap 0.1 detik biar gak ngunci 1 titik
-	if tick() - startTime > 0.1 then
-		startTime = tick()
-		local team = tostring(L.Team)
-		local goalList = (team == "Home") and awayGoal or homeGoal
-		targetGoal = goalList[math.random(1, #goalList)]
-	end
-
-	if not targetGoal then return end
-
-	local dirToGoal = (targetGoal - ball.Position).Unit
-	local timeNow = tick() - startTime
-	local verticalOffset = math.sin(timeNow * zigzagSpeed) * zigzagAmplitude
-	local zigzagVector = Vector3.new(0, verticalOffset, 0)
-	local finalDirection = (dirToGoal + zigzagVector).Unit
-
-	ball.AssemblyLinearVelocity = finalDirection * basePower
-	ball.AssemblyAngularVelocity = Vector3.zero
-	ball.AssemblyGravityScale = 0
-end)
 
 Tabs.ButtonTab:Section({ Title = "▸ Game Enhancers" })
 
@@ -822,7 +719,7 @@ Tabs.ButtonTab:Toggle({
 Tabs.ButtonTab:Dropdown({
     Title = "STYLE CHANGER",
     Desc = "Must have Reo", 
-    Values = { "Kaiser", "NEL Isagi", "NEL Rin", "Sae", "Don Lorenzo", "NEL Bachira", "King", "Kunigami", "Rin", "Aiku", "Shidou", "Yukimiya", "Karasu", "Reo", "Nagi", "Igaguri", "Kurona", "Bachira", "Otoya", "Gagamaru", "Hiori", "Isagi", "Chigiri"},
+    Values = { "Kaiser", "NEL Isagi", "NEL Rin", "Sae", "Don Lorenzo", "NEL Bachira", "King", "Kunigami", "Aiku", "Shidou", "Yukimiya", "Karasu", "Reo", "Nagi", "Igaguri", "Kurona", "Bachira", "Otoya", "Gagamaru", "Hiori", "Isagi", "Chigiri"},
     Value = "Default",
     Callback = function(option)
         local player = game:GetService("Players").LocalPlayer
@@ -838,7 +735,7 @@ Tabs.ButtonTab:Dropdown({
 Tabs.ButtonTab:Dropdown({
     Title = "FLOW CHANGER",
     Desc = "Must have Reo", 
-    Values = { "Awakened Genius", "Destructive Impulses", "Emperor", "Soul Harvester", "Prodigy", "Dribbler", "Bee Freestyle", "Snake", "Trap", "Wild Card", "Chameleon", "Demon Wings", "Crow", "King's Instinct", "Monster", "Buddha's Blessing", "Genius", "Gale Burst", "Lightning", "Ice", "Puzzle"},
+    Values = { "Homeless Man", "Awakened Genius", "Destructive Impulses", "Emperor", "Soul Harvester", "Prodigy", "Dribbler", "Bee Freestyle", "Snake", "Trap", "Wild Card", "Chameleon", "Demon Wings", "Crow", "King's Instinct", "Monster", "Buddha's Blessing", "Genius", "Gale Burst", "Lightning", "Ice", "Puzzle"},
     Value = "Default",
     Callback = function(option)
         local player = game:GetService("Players").LocalPlayer
@@ -1253,7 +1150,27 @@ Tabs.MiscTab:Button({
     end
 })
 
+local GKAssist = false
 
+
+Tabs.MiscTab:Toggle({
+    Title = "GK Assist",
+    Desc = [[Combine with Ball Expander]],
+    Default = false,
+    Callback = function(state)
+        GKAssist = state
+        if GKAssist then
+            task.spawn(function()
+                while GKAssist do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Packages.Knit.Services.BallService.RE.Dive:FireServer()
+                    end)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
 
 local tpwalking = false
 local tpwalkConnection -- buat nyimpen loop-nya
@@ -1459,8 +1376,7 @@ Tabs.InfoTab:Paragraph({
     Title = "Changelog | Update",
     Desc = [[
 Update:
-- Snakeshoot
-- Robux BLR Emotes (NEW)
+- GK Assist | It's on The Misc Tab (NEW)
 - Bug Fixed!
 ]]
 })
