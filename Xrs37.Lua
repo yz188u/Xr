@@ -30,7 +30,7 @@ logoBtn.BackgroundTransparency = 1
 logoBtn.BorderSizePixel = 0
 logoBtn.Position = UDim2.new(0, 10, 0.5, -22)
 logoBtn.Size = UDim2.new(0, 45, 0, 45)
-logoBtn.Image = "http://www.roblox.com/asset/?id=122990312323150"
+logoBtn.Image = "http://www.roblox.com/asset/?id=86136928465509"
 logoBtn.Draggable = true
 
 corner.CornerRadius = UDim.new(1, 0)
