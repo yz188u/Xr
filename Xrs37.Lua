@@ -29,7 +29,7 @@ logoBtn.Parent = gui
 logoBtn.BackgroundTransparency = 1
 logoBtn.BorderSizePixel = 0
 logoBtn.Position = UDim2.new(0, 10, 0.5, -22)
-logoBtn.Size = UDim2.new(0, 45, 0, 45)
+logoBtn.Size = UDim2.new(0, 100, 0, 70)
 logoBtn.Image = "http://www.roblox.com/asset/?id=86136928465509"
 logoBtn.Draggable = true
 
@@ -44,7 +44,7 @@ local Window = WindUI:CreateWindow({
     Title = gradient("XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")), 
     Icon = "crown",
     Author = "Zuya",
-    Folder = "XZuyaX's Hub",
+    Folder = "CloudHub",
     Size = UDim2.fromOffset(435, 345),
     Transparent = true,
     Theme = "Dark",
@@ -52,14 +52,6 @@ local Window = WindUI:CreateWindow({
     --Background = "rbxassetid://13511292247", -- rbxassetid only
     HasOutline = false,
     -- remove it below if you don't want to use the key system in your script.
-    KeySystem = { 
-        Key = { "ZuyaNeedMoney", "ilovekira", "Javier Asrahan", "w", "PermKey_0000", "Nobi1705", "EliasGG", "VengadorPrime", "Yaqama", "KEY_Perm10", "pgu245", "AKiLyAs", "NagiTheTester", "LunaPerm", "Diddy" },
-        Note = "Press Get Key Pls!, I Need Money T_T!",
-         Thumbnail = {
-          Image = "rbxassetid://122990312323150", -- rbxassetid only
-         },
-        URL = "https://discord.gg/645Xg2wey7", -- remove this if the key is not obtained from the link.
-        SaveKey = false, -- optional
     },
 })
 
@@ -120,7 +112,7 @@ UIListLayout.FillDirection = Enum.FillDirection.Vertical
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-local styles = { "Kaiser", "Kurona", "King" }
+local styles = { "Kaiser", "Kurona", "King", "Yukimiya" }
 
 for _, styleName in ipairs(styles) do
     local btn = Instance.new("TextButton")
@@ -250,7 +242,6 @@ Tabs.ButtonTab:Input({
         end
     end
 })
-
 
 Tabs.ButtonTab:Section({ Title = "▸ Game Enhancers" })
 
@@ -719,7 +710,7 @@ Tabs.ButtonTab:Toggle({
 Tabs.ButtonTab:Dropdown({
     Title = "STYLE CHANGER",
     Desc = "Must have Reo", 
-    Values = { "Kaiser", "NEL Isagi", "NEL Rin", "Sae", "Don Lorenzo", "NEL Bachira", "King", "Kunigami", "Aiku", "Shidou", "Yukimiya", "Karasu", "Reo", "Nagi", "Igaguri", "Kurona", "Bachira", "Otoya", "Gagamaru", "Hiori", "Isagi", "Chigiri"},
+    Values = { "Loki", "Kaiser", "NEL Isagi", "NEL Rin", "Sae", "Don Lorenzo", "NEL Bachira", "King", "Kunigami", "Aiku", "Shidou", "Yukimiya", "Karasu", "Reo", "Nagi", "Igaguri", "Kurona", "Bachira", "Otoya", "Gagamaru", "Hiori", "Isagi", "Chigiri"},
     Value = "Default",
     Callback = function(option)
         local player = game:GetService("Players").LocalPlayer
@@ -735,7 +726,7 @@ Tabs.ButtonTab:Dropdown({
 Tabs.ButtonTab:Dropdown({
     Title = "FLOW CHANGER",
     Desc = "Must have Reo", 
-    Values = { "Homeless Man", "Awakened Genius", "Destructive Impulses", "Emperor", "Soul Harvester", "Prodigy", "Dribbler", "Bee Freestyle", "Snake", "Trap", "Wild Card", "Chameleon", "Demon Wings", "Crow", "King's Instinct", "Monster", "Buddha's Blessing", "Genius", "Gale Burst", "Lightning", "Ice", "Puzzle"},
+    Values = { "Homeless Man", "Godspeed", "Awakened Genius", "Destructive Impulses", "Emperor", "Soul Harvester", "Prodigy", "Dribbler", "Bee Freestyle", "Snake", "Trap", "Wild Card", "Chameleon", "Demon Wings", "Crow", "King's Instinct", "Monster", "Buddha's Blessing", "Genius", "Gale Burst", "Lightning", "Ice", "Puzzle"},
     Value = "Default",
     Callback = function(option)
         local player = game:GetService("Players").LocalPlayer
@@ -1376,8 +1367,8 @@ Tabs.InfoTab:Paragraph({
     Title = "Changelog | Update",
     Desc = [[
 Update:
-- GK Assist | It's on The Misc Tab (NEW)
-- Bug Fixed!
+- GK Assist | It's on The Misc Tab 
+- SnakeShoot Button Added! (NEW)
 ]]
 })
  
