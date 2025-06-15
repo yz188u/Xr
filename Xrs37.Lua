@@ -44,7 +44,7 @@ local Window = WindUI:CreateWindow({
     Title = gradient("XZuyaX's HUB", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")), 
     Icon = "crown",
     Author = "Zuya",
-    Folder = "CloudHub",
+    Folder = "XZuyaX's Hub",
     Size = UDim2.fromOffset(435, 345),
     Transparent = true,
     Theme = "Dark",
@@ -112,7 +112,7 @@ UIListLayout.FillDirection = Enum.FillDirection.Vertical
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-local styles = { "Kaiser", "Kurona", "King", "Yukimiya" }
+local styles = { "Kaiser", "Kurona", "King" }
 
 for _, styleName in ipairs(styles) do
     local btn = Instance.new("TextButton")
@@ -242,6 +242,7 @@ Tabs.ButtonTab:Input({
         end
     end
 })
+
 
 Tabs.ButtonTab:Section({ Title = "▸ Game Enhancers" })
 
@@ -1367,8 +1368,8 @@ Tabs.InfoTab:Paragraph({
     Title = "Changelog | Update",
     Desc = [[
 Update:
-- GK Assist | It's on The Misc Tab 
-- SnakeShoot Button Added! (NEW)
+- GK Assist | It's on The Misc Tab (NEW)
+- Bug Fixed!
 ]]
 })
  
