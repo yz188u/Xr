@@ -29,7 +29,7 @@ logoBtn.Parent = gui
 logoBtn.BackgroundTransparency = 1
 logoBtn.BorderSizePixel = 0
 logoBtn.Position = UDim2.new(0, 10, 0.5, -22)
-logoBtn.Size = UDim2.new(0, 100, 0, 70)
+logoBtn.Size = UDim2.new(0, 45, 0, 45)
 logoBtn.Image = "http://www.roblox.com/asset/?id=86136928465509"
 logoBtn.Draggable = true
 
@@ -52,6 +52,14 @@ local Window = WindUI:CreateWindow({
     --Background = "rbxassetid://13511292247", -- rbxassetid only
     HasOutline = false,
     -- remove it below if you don't want to use the key system in your script.
+    KeySystem = { 
+        Key = { "ZuyaNeedMoney", "ilovekira", "Javier Asrahan", "w", "PermKey_0000", "Nobi1705", "EliasGG", "VengadorPrime", "Yaqama", "KEY_Perm10", "pgu245", "AKiLyAs", "NagiTheTester", "LunaPerm", "Diddy" },
+        Note = "Press Get Key Pls!, I Need Money T_T!",
+         Thumbnail = {
+          Image = "rbxassetid://122990312323150", -- rbxassetid only
+         },
+        URL = "https://discord.gg/645Xg2wey7", -- remove this if the key is not obtained from the link.
+        SaveKey = false, -- optional
     },
 })
 
@@ -112,7 +120,7 @@ UIListLayout.FillDirection = Enum.FillDirection.Vertical
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-local styles = { "Kaiser", "Kurona", "King" }
+local styles = { ""Kaiser", "Kurona", "King", "Yukimiya" }
 
 for _, styleName in ipairs(styles) do
     local btn = Instance.new("TextButton")
